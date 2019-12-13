@@ -36,6 +36,8 @@ while(True):
 	opening = cv2.morphologyEx(th, cv2.MORPH_OPEN, kernel)
 	dilated = cv2.dilate(opening, kernel, iterations=1)	
 
+	cv2.circle(dilated,(300,200), 10, (255,255,255), -1)
+
 	cv2.imshow('frame', img)
 	#cv2.imshow('blur', blur)
 

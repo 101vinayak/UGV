@@ -63,16 +63,24 @@ while(True):
 	opening = cv2.morphologyEx(base, cv2.MORPH_OPEN, kernel)
 	dilated = cv2.dilate(opening, kernel, iterations=1)
 	
-	ref_line = np.zeros((0,1280))
-	for ix in range(0,1280):
-		ref_line[ix] = 255
-		
-	ref_line = np.array(ref_line)
-	print(ref_line.shape)
-	
 	img = dilated
+	
+	points = []
+	for ix in range(0,1280):
+		
+		if img[300][ix] == 255:
+			points.append(ix)
+		
+		try:
+			a = min(points)
+			b = max(points)
+			mid = (b-a)/2
+		except:
+			mid = 0
+		
+		cv2.circle(img,(mid,300), 10, (255,255,255), 1)
 
-	cv2.imshow('dilated', dilated)
+	cv2.imshow('result', img)
 	#out.write(dilated)
 
 	if cv2.waitKey(5) & 0xFF == ord('q'):
