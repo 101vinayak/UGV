@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 kernel = np.ones((5,5), np.uint8)
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture('IGVC Videos/3.MP4')
 
 #fourcc = cv2.VideoWriter_fourcc(*'XVID')
 #out = cv2.VideoWriter('output.mp4',fourcc, 20.0, (568,1024))
@@ -12,13 +12,13 @@ while(True):
 
 	ret, frame_org = cap.read()	
 	frame = cv2.cvtColor(frame_org, cv2.COLOR_BGR2GRAY)
-	frame = frame[250:720,:]
+	frame = frame[300:650,:]
 
 	blur1 = cv2.medianBlur(frame,9)	
 	blur = cv2.GaussianBlur(blur1,(7,7),0)
 
-	ret, th = cv2.threshold(blur, 200, 255, cv2.THRESH_TOZERO_INV)
-	ret, th = cv2.threshold(th, 115, 255, cv2.THRESH_BINARY)
+	ret, th = cv2.threshold(blur, 180, 255, cv2.THRESH_TOZERO_INV)
+	ret, th = cv2.threshold(th, 110, 255, cv2.THRESH_BINARY)
 
 	'''
 	ret,th1 = cv2.threshold(blur,127,255,cv2.THRESH_BINARY)

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 kernel = np.ones((5,5), np.uint8)
-cap = cv2.VideoCapture('IGVC Videos/3.MP4',2)
+cap = cv2.VideoCapture('IGVC Videos/3.MP4')
 
 #fourcc = cv2.VideoWriter_fourcc(*'XVID')
 #out = cv2.VideoWriter('output.mp4',fourcc, 20.0, (568,1024))
@@ -14,7 +14,7 @@ while(True):
 	frame = cv2.cvtColor(frame_org, cv2.COLOR_BGR2GRAY)
 	frame = frame[250:650,:]
 
-	blur1 = cv2.medianBlur(frame,7)	
+	blur1 = cv2.medianBlur(frame,5)	
 	blur = cv2.GaussianBlur(blur1,(5,5),0)
 
 	ret, th = cv2.threshold(blur, 200, 255, cv2.THRESH_TOZERO_INV)
@@ -59,8 +59,20 @@ while(True):
 		if len(hull)==4:
 		    cv2.drawContours(base,[hull],0,(0,255,0),2)
 	'''
+	
+	opening = cv2.morphologyEx(base, cv2.MORPH_OPEN, kernel)
+	dilated = cv2.dilate(opening, kernel, iterations=1)
+	
+	ref_line = np.zeros((0,1280))
+	for ix in range(0,1280):
+		ref_line[ix] = 255
+		
+	ref_line = np.array(ref_line)
+	print(ref_line.shape)
+	
+	img = dilated
 
-	cv2.imshow('dilated', base)
+	cv2.imshow('dilated', dilated)
 	#out.write(dilated)
 
 	if cv2.waitKey(5) & 0xFF == ord('q'):
