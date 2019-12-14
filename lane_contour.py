@@ -1,7 +1,9 @@
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
+import time
 
+dirc = []
 kernel = np.ones((5,5), np.uint8)
 cap = cv2.VideoCapture('IGVC Videos/3.MP4')
 
@@ -64,26 +66,43 @@ while(True):
 	dilated = cv2.dilate(opening, kernel, iterations=1)
 	
 	img = dilated
-	cv2.circle(img,(640,300), 10, (255,255,255), 1)
 	mid = []
 	
-	for ix in range(10):
+	for ix in range(50):
 	
 		pts = []		
 		for jx in range(1280):
 			if img[300+ix][jx] == 255:
 				pts.append(jx)	
-		try:
+		try: 
 			a = min(pts)
 			b = max(pts)
 			
-			mid.append((b-a)/2)
+			if b-a < 100:
+				if a and b < 600:
+					mid.append((1280-b)/2)
+				else:
+					mid.append(b/2)
+			else:
+				mid.append((b-a)/2 + a)
 		except:
-			mid.append(mid[-1])
+			mid.append(640)
 	
 	mid = sum(mid)/len(mid)
-	cv2.circle(img,(mid,305), 10, (255,255,255), 1)
+	dirc.append(mid)
+	#cv2.circle(img,(mid,305), 10, (255,255,255), 1)
 	
+	ln = len(dirc)
+	'''
+	while ln>1:
+		if abs(dirc[ln-1] - dirc[ln-2]) > 400:
+			dirc[ln-1] = dirc[ln-2]
+	'''
+	if dirc[ln-1] < dirc[ln-2]:
+		print("-----LEFT-----")
+	else:
+		print("-----RIGHT-----")	
+		
 	'''
 	im = np.zeros((50,1280))
 	for ix in range(50):
@@ -93,6 +112,8 @@ while(True):
 	
 	cv2.imshow('result', img)
 	#out.write(dilated)
+	
+	#time.sleep(10)
 
 	if cv2.waitKey(5) & 0xFF == ord('q'):
 		break
