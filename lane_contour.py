@@ -12,9 +12,9 @@ while(True):
 
 	ret, frame_org = cap.read()	
 	frame = cv2.cvtColor(frame_org, cv2.COLOR_BGR2GRAY)
-	frame = frame[250:650,:]
+	frame = frame[300:670,:]
 
-	blur1 = cv2.medianBlur(frame,5)	
+	blur1 = cv2.medianBlur(frame,5)
 	blur = cv2.GaussianBlur(blur1,(5,5),0)
 
 	ret, th = cv2.threshold(blur, 200, 255, cv2.THRESH_TOZERO_INV)
@@ -41,8 +41,8 @@ while(True):
 	edges = cv2.Canny(dilated,225,250)
 	cv2.imshow('edges', edges)
 
-	base = np.zeros((470,1280))
-	lines = cv2.HoughLinesP(dilated,1,np.pi/180,100,minLineLength=30,maxLineGap=70)
+	base = np.zeros((370,1280))
+	lines = cv2.HoughLinesP(dilated,1,np.pi/50,50,minLineLength=50,maxLineGap=70)
 	
 	if lines is not None:
 		for line in lines:
@@ -64,22 +64,33 @@ while(True):
 	dilated = cv2.dilate(opening, kernel, iterations=1)
 	
 	img = dilated
+	cv2.circle(img,(640,300), 10, (255,255,255), 1)
+	mid = []
 	
-	points = []
-	for ix in range(0,1280):
-		
-		if img[300][ix] == 255:
-			points.append(ix)
-		
+	for ix in range(10):
+	
+		pts = []		
+		for jx in range(1280):
+			if img[300+ix][jx] == 255:
+				pts.append(jx)	
 		try:
-			a = min(points)
-			b = max(points)
-			mid = (b-a)/2
+			a = min(pts)
+			b = max(pts)
+			
+			mid.append((b-a)/2)
 		except:
-			mid = 0
-		
-		cv2.circle(img,(mid,300), 10, (255,255,255), 1)
-
+			mid.append(mid[-1])
+	
+	mid = sum(mid)/len(mid)
+	cv2.circle(img,(mid,305), 10, (255,255,255), 1)
+	
+	'''
+	im = np.zeros((50,1280))
+	for ix in range(50):
+		for jx in range(1280):
+			im[ix][jx] = dilated[290+ix][jx]
+	'''
+	
 	cv2.imshow('result', img)
 	#out.write(dilated)
 
