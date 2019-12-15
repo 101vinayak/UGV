@@ -1,9 +1,16 @@
+#!/usr/bin/env python
+# license removed for brevity
+import rospy
+from std_msgs.msg import String
+
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import time
 
 dirc = []
+str strng
+
 kernel = np.ones((5,5), np.uint8)
 cap = cv2.VideoCapture('IGVC Videos/3.MP4')
 
@@ -90,7 +97,7 @@ while(True):
 	
 	mid = sum(mid)/len(mid)
 	dirc.append(mid)
-	#cv2.circle(img,(mid,305), 10, (255,255,255), 1)
+	cv2.circle(img,(mid,305), 10, (255,255,255), 1)
 	
 	ln = len(dirc)
 	'''
@@ -99,9 +106,9 @@ while(True):
 			dirc[ln-1] = dirc[ln-2]
 	'''
 	if dirc[ln-1] < dirc[ln-2]:
-		print("-----LEFT-----")
+		strng = "LEFT"
 	else:
-		print("-----RIGHT-----")	
+		strng = "RIGHT"	
 		
 	'''
 	im = np.zeros((50,1280))
@@ -114,6 +121,22 @@ while(True):
 	#out.write(dilated)
 	
 	#time.sleep(10)
+	
+	def lane_contour():
+	    pub = rospy.Publisher('Direction', String, queue_size=10)
+	    rospy.init_node('lane_contour', anonymous=True)
+	    rate = rospy.Rate(10) # 10hz
+	    while not rospy.is_shutdown():
+		hello_str = strng
+		rospy.loginfo(hello_str)
+		pub.publish(hello_str)
+		rate.sleep()
+		
+	try:
+        	lane_contour()
+    	except rospy.ROSInterruptException:
+        	pass
+        
 
 	if cv2.waitKey(5) & 0xFF == ord('q'):
 		break
