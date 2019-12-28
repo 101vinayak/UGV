@@ -4,21 +4,21 @@ import numpy as np
 
 kernel = np.ones((5,5), np.uint8)
 
-cap = cv2.VideoCapture('IGVC Videos/3.MP4')
+cap = cv2.VideoCapture()
 
 #img = cv2.imread('IGVC Videos/2.png')
 #cv2.imshow('img', img)
 while(True):	
 	ret, img = cap.read()	
 	cv2.imshow('img', img)	
-	
+	'''
 	for ix in range(img.shape[0]):
 		for jx in range(img.shape[1]):
 			
 			color = img[ix,jx]
-			color[1] = 0
+			#print(color[1])
 			img[ix,jx] = color
-
+	'''
 	frame = img[300:720,:]	
 	frame = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)	
 	

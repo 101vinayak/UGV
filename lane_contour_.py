@@ -4,23 +4,39 @@ import numpy as np
 import time
 
 dirc = []
+
 kernel = np.ones((5,5), np.uint8)
 cap = cv2.VideoCapture('IGVC Videos/3.MP4')
 
 #fourcc = cv2.VideoWriter_fourcc(*'XVID')
 #out = cv2.VideoWriter('output.mp4',fourcc, 20.0, (568,1024))
 
+def colourfilter(img, lower, upper):
+	hsv=cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+	mask=cv2.inRange(hsv, lower, upper)
+
+	res=cv2.bitwise_and(img, img, mask=mask)
+
+	return res
+
 while(True):
 
-	ret, frame_org = cap.read()	
-	frame = cv2.cvtColor(frame_org, cv2.COLOR_BGR2GRAY)
-	frame = frame[300:670,:]
-
+	ret, frame_org = cap.read()
+	
+	#frame = cv2.cvtColor(frame_org, cv2.COLOR_BGR2GRAY)
+	frame = frame_org[300:,:]
+	
+	lower = np.array([0, 0, 0])
+	upper = np.array([255,125,255])
+	
+	frame = colourfilter(frame, lower, upper)
+	frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+	
 	blur1 = cv2.medianBlur(frame,5)
 	blur = cv2.GaussianBlur(blur1,(5,5),0)
 
 	ret, th = cv2.threshold(blur, 200, 255, cv2.THRESH_TOZERO_INV)
-	ret, th = cv2.threshold(th, 110, 255, cv2.THRESH_BINARY)
+	ret, th = cv2.threshold(th, 110, 200, cv2.THRESH_BINARY)
 
 	'''
 	ret,th1 = cv2.threshold(blur,127,255,cv2.THRESH_BINARY)
@@ -44,8 +60,9 @@ while(True):
 	cv2.imshow('edges', edges)
 
 	base = np.zeros((370,1280))
-	lines = cv2.HoughLinesP(dilated,1,np.pi/50,50,minLineLength=50,maxLineGap=70)
-	
+	lines = cv2.HoughLinesP(dilated,1,np.pi/180,50,minLineLength=50,maxLineGap=70)
+
+
 	if lines is not None:
 		for line in lines:
 			x1, y1, x2, y2 = line[0]
@@ -92,15 +109,19 @@ while(True):
 	cv2.circle(img,(mid,305), 10, (255,255,255), 1)
 	
 	ln = len(dirc)
-	'''
+	''''
 	while ln>1:
-		if abs(dirc[ln-1] - dirc[ln-2]) > 400:
+		if abs(dirc[ln-1] - dirc[ln-2]) > 300:
 			dirc[ln-1] = dirc[ln-2]
 	'''
-	if dirc[ln-1] < dirc[ln-2]:
-		print("-----LEFT-----")
+	if abs(dirc[ln-1] - dirc[ln-2])>100:
+		
+		if dirc[ln-1]<dirc[ln-2]:
+			print("-----LEFT-----")
+		else:
+			print("-----RIGHT-----")
 	else:
-		print("-----RIGHT-----")	
+		print("STRAIGHT")
 		
 	'''
 	im = np.zeros((50,1280))

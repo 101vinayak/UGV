@@ -9,25 +9,39 @@ import numpy as np
 import time
 
 dirc = []
-str strng
 
 kernel = np.ones((5,5), np.uint8)
-cap = cv2.VideoCapture('IGVC Videos/3.MP4')
+cap = cv2.VideoCapture(1)
 
 #fourcc = cv2.VideoWriter_fourcc(*'XVID')
 #out = cv2.VideoWriter('output.mp4',fourcc, 20.0, (568,1024))
 
+def colourfilter(img, lower, upper):
+	hsv=cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+	mask=cv2.inRange(hsv, lower, upper)
+
+	res=cv2.bitwise_and(img, img, mask=mask)
+
+	return res
+
 while(True):
 
-	ret, frame_org = cap.read()	
-	frame = cv2.cvtColor(frame_org, cv2.COLOR_BGR2GRAY)
-	frame = frame[300:670,:]
+	ret, frame_org = cap.read()
+	
+	#frame = cv2.cvtColor(frame_org, cv2.COLOR_BGR2GRAY)
+	frame = frame_org[:,:]
+	
+	lower = np.array([0, 0, 0])
+	upper = np.array([255,18,255])
+	
+	frame = colourfilter(frame, lower, upper)
+	frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
 	blur1 = cv2.medianBlur(frame,5)
 	blur = cv2.GaussianBlur(blur1,(5,5),0)
 
-	ret, th = cv2.threshold(blur, 200, 255, cv2.THRESH_TOZERO_INV)
-	ret, th = cv2.threshold(th, 110, 255, cv2.THRESH_BINARY)
+	ret, th = cv2.threshold(blur, 190, 255, cv2.THRESH_TOZERO_INV)
+	ret, th = cv2.threshold(th, 130, 200, cv2.THRESH_BINARY)
 
 	'''
 	ret,th1 = cv2.threshold(blur,127,255,cv2.THRESH_BINARY)
@@ -50,8 +64,8 @@ while(True):
 	edges = cv2.Canny(dilated,225,250)
 	cv2.imshow('edges', edges)
 
-	base = np.zeros((370,1280))
-	lines = cv2.HoughLinesP(dilated,1,np.pi/50,50,minLineLength=50,maxLineGap=70)
+	base = np.zeros((480,640))
+	lines = cv2.HoughLinesP(dilated,1,np.pi/180,50,minLineLength=50,maxLineGap=70)
 	
 	if lines is not None:
 		for line in lines:
@@ -75,29 +89,29 @@ while(True):
 	img = dilated
 	mid = []
 	
-	for ix in range(50):
+	for ix in range(150):
 	
 		pts = []		
-		for jx in range(1280):
-			if img[300+ix][jx] == 255:
+		for jx in range(640):
+			if img[240+ix][jx] == 255:
 				pts.append(jx)	
 		try: 
 			a = min(pts)
 			b = max(pts)
 			
-			if b-a < 100:
-				if a and b < 600:
-					mid.append((1280-b)/2)
+			if b-a < 50:
+				if a and b < 150:
+					mid.append((640-b)/2)
 				else:
 					mid.append(b/2)
 			else:
 				mid.append((b-a)/2 + a)
 		except:
-			mid.append(640)
+			mid.append(320)
 	
 	mid = sum(mid)/len(mid)
 	dirc.append(mid)
-	cv2.circle(img,(mid,305), 10, (255,255,255), 1)
+	cv2.circle(img,(mid,400), 10, (255,255,255), 1)
 	
 	ln = len(dirc)
 	'''
@@ -105,10 +119,14 @@ while(True):
 		if abs(dirc[ln-1] - dirc[ln-2]) > 400:
 			dirc[ln-1] = dirc[ln-2]
 	'''
-	if dirc[ln-1] < dirc[ln-2]:
-		strng = "LEFT"
+	if abs(dirc[ln-1] - dirc[ln-2])>30:
+		
+		if dirc[ln-1]<dirc[ln-2]:
+			strng = 'LEFT'
+		else:
+			strng = 'RIGHT'
 	else:
-		strng = "RIGHT"	
+		strng = 'STRAIGHT'
 		
 	'''
 	im = np.zeros((50,1280))
@@ -123,14 +141,13 @@ while(True):
 	#time.sleep(10)
 	
 	def lane_contour():
-	    pub = rospy.Publisher('Direction', String, queue_size=10)
-	    rospy.init_node('lane_contour', anonymous=True)
-	    rate = rospy.Rate(10) # 10hz
-	    while not rospy.is_shutdown():
+		pub = rospy.Publisher('Direction', String, queue_size=10)
+		rospy.init_node('lane_contour', anonymous=True)
+		#rate = rospy.Rate(10) # 10hz
 		hello_str = strng
 		rospy.loginfo(hello_str)
 		pub.publish(hello_str)
-		rate.sleep()
+		#rate.sleep()
 		
 	try:
         	lane_contour()
