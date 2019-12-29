@@ -4,7 +4,7 @@ import numpy as np
 
 kernel = np.ones((5,5), np.uint8)
 
-cap = cv2.VideoCapture()
+cap = cv2.VideoCapture(1)
 
 #img = cv2.imread('IGVC Videos/2.png')
 #cv2.imshow('img', img)

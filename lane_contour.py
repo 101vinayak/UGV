@@ -1,20 +1,25 @@
 #!/usr/bin/env python
 # license removed for brevity
 import rospy
-from std_msgs.msg import String
+from std_msgs.msg import Float32
 
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import time
+import math
 
 dirc = []
 
 kernel = np.ones((5,5), np.uint8)
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 
 #fourcc = cv2.VideoWriter_fourcc(*'XVID')
-#out = cv2.VideoWriter('output.mp4',fourcc, 20.0, (568,1024))
+#out = cv2.VideoWriter('output.mp4',fourcc, 20.0, (480,640))
+
+def theta_calc(x):
+	theta = math.atan(2 * x * (math.tan(85/np.pi)) / 640)
+	return theta
 
 def colourfilter(img, lower, upper):
 	hsv=cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -89,11 +94,11 @@ while(True):
 	img = dilated
 	mid = []
 	
-	for ix in range(150):
+	for ix in range(100):
 	
 		pts = []		
 		for jx in range(640):
-			if img[240+ix][jx] == 255:
+			if img[450-ix][jx] == 255:
 				pts.append(jx)	
 		try: 
 			a = min(pts)
@@ -136,17 +141,25 @@ while(True):
 	'''
 	
 	cv2.imshow('result', img)
+	print(strng)
 	#out.write(dilated)
 	
 	#time.sleep(10)
 	
+	theta = theta_calc(abs(dirc[ln-1] - dirc[ln-2]))
+	
+	if strng == 'STRAIGHT':
+		theta = 0
+	else:
+		if strng == 'LEFT':
+			theta = -1 * theta
+	
 	def lane_contour():
-		pub = rospy.Publisher('Direction', String, queue_size=10)
+		pub = rospy.Publisher('Direction', Float32, queue_size=10)
 		rospy.init_node('lane_contour', anonymous=True)
 		#rate = rospy.Rate(10) # 10hz
-		hello_str = strng
-		rospy.loginfo(hello_str)
-		pub.publish(hello_str)
+		rospy.loginfo(theta)
+		pub.publish(theta)
 		#rate.sleep()
 		
 	try:
