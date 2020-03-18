@@ -77,7 +77,7 @@ while(True):
 		if len(hull)==4:
 		    cv2.drawContours(base,[hull],0,(0,255,0),2)
 	'''
-	
+	cv2.imshow('base', base)
 	opening = cv2.morphologyEx(base, cv2.MORPH_OPEN, kernel)
 	dilated = cv2.dilate(opening, kernel, iterations=1)
 	
